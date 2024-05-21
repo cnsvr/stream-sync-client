@@ -48,7 +48,7 @@ const Login = () => {
             />
           </div>
           <button type="submit" className="w-full bg-blue-500 bg-blue-600 text-white p-2 rounded">Login</button>
-          <p className="mt-4 text-center">Don't have an account? <Link href="/register" className="text-blue-500">Register here</Link></p>
+          <p className="mt-4 text-center">Don&apos;t have an account? <Link href="/register" className="text-blue-500">Register here</Link></p>
         </form>
         {message && <p className="mt-4 text-red-500">{message}</p>}
       </div>

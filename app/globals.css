@@ -17,14 +17,21 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  @apply bg-gray-100;
 }
+
+form {
+  @apply bg-gray-100 text-black;
+}
+
+input {
+  @apply bg-white text-black;
+}
+
+button {
+  @apply bg-blue-500 text-white;
+}
+
 
 @layer utilities {
   .text-balance {

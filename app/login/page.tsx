@@ -15,6 +15,7 @@ const Login = () => {
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, { email, password });
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('userId', res.data.id);
       router.push('/');
     } catch (error: any) {
       setMessage('Error: ' + error.response?.data.message);

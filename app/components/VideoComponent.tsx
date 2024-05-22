@@ -1,9 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 
-const VideoComponent = ({ meetingId }) => {
-  const userVideo = useRef(null);
-  const partnerVideo = useRef(null);
+interface VideoComponentProps {
+  meetingId: string;
+}
+
+const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
+  const userVideo = useRef<HTMLVideoElement | null>(null);
+  const partnerVideo = useRef<HTMLVideoElement | null>(null);
   const peer = useRef<Peer | null>(null);
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -23,6 +27,11 @@ const VideoComponent = ({ meetingId }) => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
+      }
+
+      if (!peer.current) {
+        console.error('PeerJS sunucusuna bağlanılamadı.');
+        return;
       }
 
       // Gelen aramaları cevapla
@@ -45,7 +54,7 @@ const VideoComponent = ({ meetingId }) => {
     });
 
     return () => {
-      peer.current.destroy();
+      peer.current?.destroy();
     };
   }, [meetingId]);
 

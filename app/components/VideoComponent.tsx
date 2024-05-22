@@ -66,6 +66,7 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
   }, [meetingId]);
 
   const initiatePeer = (initiator = true, stream: any, signalData = null) => {
+    console.log('Initiating peer connection');
     const newPeer = new SimplePeer({
       initiator,
       trickle: false,

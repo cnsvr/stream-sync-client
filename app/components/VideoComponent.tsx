@@ -44,7 +44,7 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
       });
 
       socket.on('receiveVideo', (data) => {
-        console.log('Received video signal:', signal);
+        console.log('Received video signal:', data);
         if (peer) {
           peer.signal(data);
         } else {

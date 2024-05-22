@@ -33,21 +33,29 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
     
     socket.emit('joinMeeting', { meetingId, userId });
 
-    socket.on('userJoined', ({ userId }) => {
-      console.log(`User ${userId} joined`);
-      initiatePeer(false);
-    });
-
-    socket.on('receiveVideo', (data) => {
-      if (peer) {
-        peer.signal(data);
-      } else {
-        initiatePeer(true, data);
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+      if (userVideo.current) {
+        userVideo.current.srcObject = stream;
       }
-    });
 
-    socket.on('userDisconnected', ({ userId }) => {
-      console.log(`User ${userId} disconnected`);
+      socket.on('userJoined', ({ userId }) => {
+        console.log(`User ${userId} joined`);
+        initiatePeer(false, stream);
+      });
+
+      socket.on('receiveVideo', (data) => {
+        if (peer) {
+          peer.signal(data);
+        } else {
+          initiatePeer(true, stream, data);
+        }
+      });
+
+      socket.on('userDisconnected', ({ userId }) => {
+        console.log(`User ${userId} disconnected`);
+      });
+    }).catch((err) => {
+      console.error('Error accessing media devices.', err);
     });
 
     return () => {
@@ -56,36 +64,28 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
     };
   }, [meetingId]);
 
-  const initiatePeer = (initiator = true, signalData = null) => {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-      if (userVideo.current) {
-        userVideo.current.srcObject = stream;
-      }
-
-      const newPeer = new SimplePeer({
-        initiator,
-        trickle: false,
-        stream: stream,
-      });
-
-      newPeer.on('signal', (data) => {
-        socket.emit('sendVideo', data);
-      });
-
-      newPeer.on('stream', (stream) => {
-        if (partnerVideo.current) {
-          partnerVideo.current.srcObject = stream;
-        }
-      });
-
-      if (signalData) {
-        newPeer.signal(signalData);
-      }
-
-      setPeer(newPeer);
-    }).catch((err) => {
-      console.error('Error accessing media devices.', err);
+  const initiatePeer = (initiator = true, stream, signalData = null) => {
+    const newPeer = new SimplePeer({
+      initiator,
+      trickle: false,
+      stream: stream,
     });
+
+    newPeer.on('signal', (data) => {
+      socket.emit('sendVideo', data);
+    });
+
+    newPeer.on('stream', (stream) => {
+      if (partnerVideo.current) {
+        partnerVideo.current.srcObject = stream;
+      }
+    });
+
+    if (signalData) {
+      newPeer.signal(signalData);
+    }
+
+    setPeer(newPeer);
   };
 
   return (

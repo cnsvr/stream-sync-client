@@ -35,12 +35,14 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
 
     socket.on('userJoined', ({ userId }) => {
       console.log(`User ${userId} joined`);
-      initiatePeer();
+      initiatePeer(false);
     });
 
     socket.on('receiveVideo', (data) => {
       if (peer) {
         peer.signal(data);
+      } else {
+        initiatePeer(true, data);
       }
     });
 
@@ -54,14 +56,14 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
     };
   }, [meetingId]);
 
-  const initiatePeer = () => {
+  const initiatePeer = (initiator = true, signalData = null) => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
       }
 
       const newPeer = new SimplePeer({
-        initiator: true,
+        initiator,
         trickle: false,
         stream: stream,
       });
@@ -75,6 +77,10 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
           partnerVideo.current.srcObject = stream;
         }
       });
+
+      if (signalData) {
+        newPeer.signal(signalData);
+      }
 
       setPeer(newPeer);
     }).catch((err) => {

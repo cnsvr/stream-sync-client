@@ -72,10 +72,12 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
     });
 
     newPeer.on('signal', (data) => {
+      console.log('Sending video data');
       socket.emit('sendVideo', data);
     });
 
     newPeer.on('stream', (stream) => {
+      console.log('Receiving video data');
       if (partnerVideo.current) {
         partnerVideo.current.srcObject = stream;
       }

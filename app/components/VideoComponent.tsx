@@ -5,7 +5,7 @@ const VideoComponent = ({ meetingId }) => {
   const userVideo = useRef(null);
   const partnerVideo = useRef(null);
   const peer = useRef<Peer | null>(null);
-  const host = process.env.NEXT_PUBLIC_PEER_SERVER || window.location.hostname;
+  const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
   useEffect(() => {
@@ -14,13 +14,9 @@ const VideoComponent = ({ meetingId }) => {
 
     // PeerJS sunucusuna bağlan
     peer.current = new Peer(peerId, {
-      host: host, // Sunucunuzun çalıştığı IP adresi
-      port: port, // Sunucunuzun çalıştığı port
-      path: '/peerjs'
-    });
-
-    peer.current.on('open', id => {
-      console.log('My peer ID is: ' + id);
+      host: host,
+      port: port,
+      secure: true,
     });
 
     // Yerel video akışını al
@@ -40,15 +36,11 @@ const VideoComponent = ({ meetingId }) => {
       });
 
       // Toplantıya katıldığında diğer kullanıcıya bağlan
-      socket.emit('joinMeeting', { meetingId, userId });
-
-      socket.on('userJoined', ({ userId }) => {
-        const call = peer.current.call(`${meetingId}-${userId}`, stream);
-        call.on('stream', remoteStream => {
-          if (partnerVideo.current) {
-            partnerVideo.current.srcObject = remoteStream;
-          }
-        });
+      const call = peer.current.call(`${meetingId}-otherUser`, stream);
+      call.on('stream', remoteStream => {
+        if (partnerVideo.current) {
+          partnerVideo.current.srcObject = remoteStream;
+        }
       });
     });
 

@@ -71,6 +71,10 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
       trickle: false,
       stream: stream,
     });
+    
+    newPeer.on('connect', () => {
+      console.log('Peer connection established');
+    });
 
     newPeer.on('signal', (data) => {
       console.log('Sending video data');
@@ -82,6 +86,14 @@ const VideoComponent: React.FC<VideoComponentProps> = ({ meetingId }) => {
       if (partnerVideo.current) {
         partnerVideo.current.srcObject = stream;
       }
+    });
+
+    newPeer.on('close', () => {
+      console.log('Peer connection closed');
+    });
+
+    newPeer.on('error', (err) => {
+      console.error('Peer connection error:', err);
     });
 
     if (signalData) {

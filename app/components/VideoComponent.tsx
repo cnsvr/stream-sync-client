@@ -54,7 +54,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
 
   useEffect(() => {
     const userId = localStorage.getItem('userId') || 'unknownUser';
-    const peerId = `${meetingId}-${userId}`;
+    const peerId = `${meetingId}-${userId}${Math.floor(Math.random() * 1000)}`;
 
     // PeerJS sunucusuna bağlan
     peer.current = new Peer(peerId, {

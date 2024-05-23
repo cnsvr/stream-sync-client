@@ -7,7 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-interface Meeting {
+export interface Meeting {
   _id: string;
   creator: string;
   meetingId: string;

@@ -5,30 +5,40 @@ import '../styles/video-component.css';
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
 
-interface VideoComponentProps {
+interface Meeting {
+  _id: string;
+  creator: string,
   meetingId: string;
+  participant: Participant;
+  createdAt: string;
 }
 
-const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
+interface Participant {
+  _id: string;
+  email: string;
+  fullName: string;
+}
+
+interface VideoComponentProps {
+  meetingId: string;
+  meeting: Meeting;
+}
+
+const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
   const peer = useRef<Peer | null>(null);
   const [partnerConnected, setPartnerConnected] = useState<boolean>(false);
+  const [isMyVideoOn, setIsMyVideoOn] = useState<boolean>(true);
+  const [isMyAudioOn, setIsMyAudioOn] = useState<boolean>(true);
+  const [isPartnerVideoOn, setIsPartnerVideoOn] = useState<boolean>(true);
+  const [isPartnerAudioOn, setIsPartnerAudioOn] = useState<boolean>(true);
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
   useEffect(() => {
     const userId = localStorage.getItem('userId') || 'unknownUser';
     const peerId = `${meetingId}-${userId}`;
-
-    const mediaConstraints = {
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: 'user',
-      },
-      audio: true,
-    };
 
     // PeerJS sunucusuna bağlan
     peer.current = new Peer(peerId, {
@@ -44,7 +54,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
     });
 
     // Yerel video akışını al
-    navigator.mediaDevices.getUserMedia(mediaConstraints).then(stream => {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
       }
@@ -94,13 +104,15 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
   }, [meetingId]);
 
   return (
-    <div className="video-container">
-      <video ref={userVideo} autoPlay playsInline />
-      {partnerConnected ? (
-        <video ref={partnerVideo} autoPlay playsInline />
-      ) : (
-        <div className="not-connected">Guest is not available</div>
-      )}
+    <div>
+      <div className="video-container">
+        <video ref={userVideo} autoPlay playsInline />
+        {partnerConnected ? (
+          <video ref={partnerVideo} autoPlay playsInline />
+        ) : (
+          <div className="not-connected">Guest is not available</div>
+        )}
+      </div>
     </div>
   );
 };

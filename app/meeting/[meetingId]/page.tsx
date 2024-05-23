@@ -73,7 +73,7 @@ const MeetingPage = () => {
       <h1 className="text-3xl font-bold mb-8">Meeting</h1>
       <div className="w-full flex justify-center">
         <div className="max-w-5xl max-h-5xl w-full">
-          <VideoComponent meetingId={meetingId as string} />
+          <VideoComponent meetingId={meetingId as string} meeting={meeting} />
         </div>
       </div>
     </main>

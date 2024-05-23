@@ -57,7 +57,7 @@ export default function Home() {
       }
     };
 
-    fetchMeetings();
+    fetchMeetings();   
   }, []);
 
   const handleCreateMeeting = async (meetingId : string, participant: string ) => {

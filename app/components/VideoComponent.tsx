@@ -21,6 +21,11 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
       host: host,
       port: port,
       secure: true,
+      path: '/myapp',
+    });
+
+    peer.current.on('open', id => {
+      console.log('My peer ID is: ' + id);
     });
 
     // Yerel video akışını al

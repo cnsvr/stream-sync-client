@@ -68,9 +68,8 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
     peer.current.on('open', id => {
       console.log('My peer ID is: ' + id);
       socket.emit('joinMeeting', { meetingId, peerId: id });
-    });
 
-    // Yerel video akışını al
+       // Yerel video akışını al
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
@@ -121,6 +120,9 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
         });
       });
     });
+    });
+
+   
 
     return () => {
       peer.current?.destroy();

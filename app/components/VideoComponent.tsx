@@ -32,7 +32,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
-  /*
+  
   const iceServers = [
 
     {
@@ -45,12 +45,12 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
     },
     
     {
-          "url": "turn:europe.relay.metered.ca:443",
+          "urls": "turn:europe.relay.metered.ca:443",
           "username": "1f56d8c725879fb3809563fa",
           "credential": "7QNpUd1kXOjtpK9/"
     }
 ];
-*/
+
 
   useEffect(() => {
     const userId = localStorage.getItem('userId') || 'unknownUser';
@@ -62,14 +62,18 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       port: port,
       secure: true,
       path: '/myapp',
-      debug: 3
+      debug: 1,
+      config: {
+        iceServers: iceServers
+      }
     });
 
     peer.current.on('open', id => {
       console.log('My peer ID is: ' + id);
       socket.emit('joinMeeting', { meetingId, peerId: id });
+    });
 
-       // Yerel video akışını al
+    // Yerel video akışını al
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
@@ -122,10 +126,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(false);
         });
       });
-    });
-    });
-
-   
+    });   
 
     return () => {
       peer.current?.destroy();

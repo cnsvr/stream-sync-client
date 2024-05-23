@@ -1,30 +1,51 @@
 .video-container {
     display: flex;
-    justify-content: center; /* Videoları yatayda ortalar */
-    align-items: center; /* Videoları dikeyde ortalar */
-    gap: 20px; /* Videolar arasındaki boşluk */
-    max-width: 100%; /* Konteyner genişliği ekranı aşmasın */
-    padding: 20px;
-    box-sizing: border-box; /* Padding'in genişliğe dahil edilmesini sağlar */
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    max-height: 100vh; /* Tam ekran yüksekliği */
+    overflow: hidden; /* Taşan içeriği gizle */
   }
   
-.video-container video {
-    width: 55%; /* Videoların genişliğini ayarlar */
-    height: 500px; /* Videoların yüksekliğini otomatik ayarlar */
-    aspect-ratio: 16/9; /* En-boy oranını sabitler */
-    object-fit: cover; /* Videoların arka planla tam eşleşmesini sağlar */
-    border: 2px solid #333; /* Videoların etrafına kenarlık ekler */
-}
-
-.not-connected {
-    width: 55%;
-    height: 500px;
-    aspect-ratio: 16/9;
+  .video-wrapper {
+    position: relative;
+    width: calc(50% - 1rem); /* Yarı genişlik, aralarındaki boşluk hariç */
+    padding-top: 50%; /* 1:1 Aspect Ratio */
+    background: #000;
+    overflow: hidden;
+  }
+  
+  video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .video-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 0.5rem 0;
+  }
+  
+  .not-connected {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #333;
-    color: #fff;
-    border: 2px solid #333;
-    text-align: center;
-}
+    width: 100%;
+    height: 100%;
+    color: white;
+    background: rgba(0, 0, 0, 0.8);
+    position: absolute; /* Ekle */
+    top: 0; /* Ekle */
+    left: 0; /* Ekle */
+  }
+  

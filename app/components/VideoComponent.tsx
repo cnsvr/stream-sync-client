@@ -7,7 +7,7 @@ const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000')
 
 interface Meeting {
   _id: string;
-  creator: string,
+  creator: Participant,
   meetingId: string;
   participant: Participant;
   createdAt: string;
@@ -100,15 +100,22 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   }, [meetingId]);
 
   return (
-    <div>
-      <div className="video-container">
-        <video ref={userVideo} autoPlay playsInline />
-        {partnerConnected ? (
-          <video ref={partnerVideo} autoPlay playsInline />
-        ) : (
-          <div className="not-connected">Guest is not available</div>
-        )}
+    <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">
+      <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
+        <video ref={userVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
+        <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">{meeting.creator.fullName}</div>
       </div>
+      {partnerConnected ? (
+        <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
+          <video ref={partnerVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
+          <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">{meeting.participant.fullName}</div>
+        </div>
+      ) : (
+        <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
+          <div className="not-connected flex justify-center items-center w-full h-full text-white bg-black bg-opacity-80">Guest is not available</div>
+          <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">{meeting.participant.fullName}</div>
+        </div>
+      )}
     </div>
   );
 };

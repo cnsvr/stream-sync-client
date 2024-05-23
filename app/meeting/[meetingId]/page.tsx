@@ -6,6 +6,7 @@ import VideoComponent from '../../components/VideoComponent';
 
 interface Meeting {
   _id: string;
+  creator: Participant;
   meetingId: string;
   participant: Participant;
   createdAt: string;

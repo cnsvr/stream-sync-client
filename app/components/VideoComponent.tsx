@@ -18,8 +18,8 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
   useEffect(() => {
-    // const userId = localStorage.getItem('userId') || 'unknownUser';
-    const peerId = `${meetingId}`;
+    const userId = localStorage.getItem('userId') || 'unknownUser';
+    const peerId = `${meetingId}-${userId}`;
 
     // PeerJS sunucusuna bağlan
     peer.current = new Peer(peerId, {
@@ -49,6 +49,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
       peer.current.on('call', call => {
         call.answer(stream);
         call.on('stream', remoteStream => {
+          console.log('Stream received on call:', remoteStream);
           setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
@@ -63,6 +64,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
         console.log('User joined:', peerId);
         const call = peer.current?.call(peerId, stream);
         call?.on('stream', remoteStream => {
+          console.log('Stream received on userJoined:', remoteStream);
           setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;

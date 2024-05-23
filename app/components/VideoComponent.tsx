@@ -33,20 +33,22 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
   const iceServers = [
+
     {
           "urls": "stun:stun.relay.metered.ca:80"
     },
     {
-          "urls": "turn:global.relay.metered.ca:80",
+          "urls": "turn:europe.relay.metered.ca:80",
           "username": "1f56d8c725879fb3809563fa",
           "credential": "7QNpUd1kXOjtpK9/"
     },
+    
     {
-          "urls": "turn:global.relay.metered.ca:443",
+          "urls": "turn:europe.relay.metered.ca:443",
           "username": "1f56d8c725879fb3809563fa",
           "credential": "7QNpUd1kXOjtpK9/"
     }
-  ];
+];
 
   useEffect(() => {
     const userId = localStorage.getItem('userId') || 'unknownUser';

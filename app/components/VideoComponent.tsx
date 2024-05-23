@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import io from 'socket.io-client';
 import '../styles/video-component.css';
@@ -13,6 +13,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
   const peer = useRef<Peer | null>(null);
+  const [partnerConnected, setPartnerConnected] = useState<boolean>(false);
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
@@ -48,17 +49,27 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
       peer.current.on('call', call => {
         call.answer(stream);
         call.on('stream', remoteStream => {
+          setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
           }
+        });
+
+        call.on('close', () => {
+          setPartnerConnected(false);
         });
       });
       socket.on('userJoined', ({ peerId }) => {
         const call = peer.current?.call(peerId, stream);
         call?.on('stream', remoteStream => {
+          setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
           }
+        });
+
+        call?.on('close', () => {
+          setPartnerConnected(false);
         });
       });
     });
@@ -72,7 +83,11 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
   return (
     <div className="video-container">
       <video ref={userVideo} autoPlay playsInline />
-      <video ref={partnerVideo} autoPlay playsInline />
+      {partnerConnected ? (
+        <video ref={partnerVideo} autoPlay playsInline />
+      ) : (
+        <div className="not-connected">Guest is not available</div>
+      )}
     </div>
   );
 };

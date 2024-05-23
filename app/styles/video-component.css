@@ -8,10 +8,23 @@
     box-sizing: border-box; /* Padding'in genişliğe dahil edilmesini sağlar */
   }
   
-  .video-container video {
-    width: 55%; /* Videoların genişliğini ayarlar */
-    height: 500px; /* Videoların yüksekliğini otomatik ayarlar */
-    aspect-ratio: 16/9; /* En-boy oranını sabitler */
-    object-fit: cover; /* Videoların arka planla tam eşleşmesini sağlar */
-    border: 2px solid #333; /* Videoların etrafına kenarlık ekler */
-  }
+.video-container video {
+width: 55%; /* Videoların genişliğini ayarlar */
+height: 500px; /* Videoların yüksekliğini otomatik ayarlar */
+aspect-ratio: 16/9; /* En-boy oranını sabitler */
+object-fit: cover; /* Videoların arka planla tam eşleşmesini sağlar */
+border: 2px solid #333; /* Videoların etrafına kenarlık ekler */
+}
+
+.not-connected {
+width: 55%;
+height: 500px;
+aspect-ratio: 16/9;
+display: flex;
+justify-content: center;
+align-items: center;
+background-color: #333;
+color: #fff;
+border: 2px solid #333;
+text-align: center;
+}

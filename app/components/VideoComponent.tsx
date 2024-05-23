@@ -42,17 +42,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           "credential": "7QNpUd1kXOjtpK9/"
     },
     {
-          "urls": "turn:global.relay.metered.ca:80?transport=tcp",
-          "username": "1f56d8c725879fb3809563fa",
-          "credential": "7QNpUd1kXOjtpK9/"
-    },
-    {
           "urls": "turn:global.relay.metered.ca:443",
-          "username": "1f56d8c725879fb3809563fa",
-          "credential": "7QNpUd1kXOjtpK9/"
-    },
-    {
-          "urls": "turns:global.relay.metered.ca:443?transport=tcp",
           "username": "1f56d8c725879fb3809563fa",
           "credential": "7QNpUd1kXOjtpK9/"
     }

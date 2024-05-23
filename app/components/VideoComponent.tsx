@@ -82,6 +82,10 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
         return;
       }
 
+      peer.current.on('error', error => {
+        console.error('PeerJS error:', error);
+      });
+
       // Gelen aramaları cevapla
       peer.current.on('call', call => {
         call.answer(stream);
@@ -90,6 +94,8 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
+          } else {
+            console.error('Partner video element is not available.');
           }
         });
 
@@ -105,6 +111,8 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
+          } else {
+            console.error('Partner video element is not available.');
           }
         });
 

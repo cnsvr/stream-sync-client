@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export interface Meeting {
   _id: string;
-  creator: string;
+  creator: Participant;
   meetingId: string;
   participant: Participant;
   createdAt: string; // Varsayılan olarak bir tarih metni, isteğe bağlı olarak Date türü de kullanılabilir
@@ -126,7 +126,7 @@ export default function Home() {
       <button onClick={handleLogout} className="absolute top-4 right-4 text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-2xl text-sm px-5 py-2.5 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800">
         Logout
       </button>
-      <div className="w-full max-w-3xl">
+      <div className="w-full max-w-4xl">
       <button onClick={openModal} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-2xl text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 float-right mb-3" type="button">
           Create Meeting
         </button>
@@ -141,6 +141,7 @@ export default function Home() {
             <thead>
               <tr>
                 <th className="border border-gray-300 px-4 py-2">Meeting ID</th>
+                <th className="border border-gray-300 px-4 py-2">Creator</th>
                 <th className="border border-gray-300 px-4 py-2">Participants</th>
                 <th className="border border-gray-300 px-4 py-2">Created At</th>
                 <th className="border border-gray-300 px-4 py-2">Actions</th>
@@ -150,6 +151,7 @@ export default function Home() {
               {meetings.map(meeting => (
                 <tr key={meeting._id}>
                   <td className="border border-gray-300 px-4 py-2">{meeting.meetingId}</td>
+                  <td className="border border-gray-300 px-4 py-2">{meeting.creator.fullName}</td>
                   <td className="border border-gray-300 px-4 py-2">{meeting.participant.fullName}</td>
                   <td className="border border-gray-300 px-4 py-2">{new Date(meeting.createdAt).toLocaleString()}</td>
                   <td className="border border-gray-300 px-4 py-2">

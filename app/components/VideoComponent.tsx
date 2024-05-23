@@ -29,10 +29,6 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
   const peer = useRef<Peer | null>(null);
   const [partnerConnected, setPartnerConnected] = useState<boolean>(false);
-  const [isMyVideoOn, setIsMyVideoOn] = useState<boolean>(true);
-  const [isMyAudioOn, setIsMyAudioOn] = useState<boolean>(true);
-  const [isPartnerVideoOn, setIsPartnerVideoOn] = useState<boolean>(true);
-  const [isPartnerAudioOn, setIsPartnerAudioOn] = useState<boolean>(true);
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 

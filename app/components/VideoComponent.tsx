@@ -60,6 +60,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
         });
       });
       socket.on('userJoined', ({ peerId }) => {
+        console.log('User joined:', peerId);
         const call = peer.current?.call(peerId, stream);
         call?.on('stream', remoteStream => {
           setPartnerConnected(true);
@@ -69,6 +70,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
         });
 
         call?.on('close', () => {
+          console.log('User left:', peerId);
           setPartnerConnected(false);
         });
       });

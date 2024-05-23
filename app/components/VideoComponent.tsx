@@ -1,5 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import Peer from 'peerjs';
+import io from 'socket.io-client';
+
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
 
 interface VideoComponentProps {
   meetingId: string;
@@ -26,6 +29,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
 
     peer.current.on('open', id => {
       console.log('My peer ID is: ' + id);
+      socket.emit('joinMeeting', { meetingId, peerId: id });
     });
 
     // Yerel video akışını al
@@ -48,18 +52,19 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
           }
         });
       });
-
-      // Toplantıya katıldığında diğer kullanıcıya bağlan
-      const call = peer.current.call(`${meetingId}-otherUser`, stream);
-      call.on('stream', remoteStream => {
-        if (partnerVideo.current) {
-          partnerVideo.current.srcObject = remoteStream;
-        }
+      socket.on('userJoined', ({ peerId }) => {
+        const call = peer.current?.call(peerId, stream);
+        call?.on('stream', remoteStream => {
+          if (partnerVideo.current) {
+            partnerVideo.current.srcObject = remoteStream;
+          }
+        });
       });
     });
 
     return () => {
       peer.current?.destroy();
+      socket.off('userJoined');
     };
   }, [meetingId]);
 

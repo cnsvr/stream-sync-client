@@ -21,6 +21,15 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
     const userId = localStorage.getItem('userId') || 'unknownUser';
     const peerId = `${meetingId}-${userId}`;
 
+    const mediaConstraints = {
+      video: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        facingMode: 'user',
+      },
+      audio: true,
+    };
+
     // PeerJS sunucusuna bağlan
     peer.current = new Peer(peerId, {
       host: host,
@@ -35,7 +44,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
     });
 
     // Yerel video akışını al
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+    navigator.mediaDevices.getUserMedia(mediaConstraints).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
       }

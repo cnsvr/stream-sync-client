@@ -32,6 +32,32 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
+  const iceServers = [
+    {
+          "urls": "stun:stun.relay.metered.ca:80"
+    },
+    {
+          "urls": "turn:global.relay.metered.ca:80",
+          "username": "1f56d8c725879fb3809563fa",
+          "credential": "7QNpUd1kXOjtpK9/"
+    },
+    {
+          "urls": "turn:global.relay.metered.ca:80?transport=tcp",
+          "username": "1f56d8c725879fb3809563fa",
+          "credential": "7QNpUd1kXOjtpK9/"
+    },
+    {
+          "urls": "turn:global.relay.metered.ca:443",
+          "username": "1f56d8c725879fb3809563fa",
+          "credential": "7QNpUd1kXOjtpK9/"
+    },
+    {
+          "urls": "turns:global.relay.metered.ca:443?transport=tcp",
+          "username": "1f56d8c725879fb3809563fa",
+          "credential": "7QNpUd1kXOjtpK9/"
+    }
+  ];
+
   useEffect(() => {
     const userId = localStorage.getItem('userId') || 'unknownUser';
     const peerId = `${meetingId}-${userId}`;
@@ -42,6 +68,9 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       port: port,
       secure: true,
       path: '/myapp',
+      config: {
+        iceServers: iceServers
+      }
     });
 
     peer.current.on('open', id => {

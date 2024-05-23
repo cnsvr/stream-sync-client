@@ -18,8 +18,8 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId') || 'unknownUser';
-    const peerId = `${meetingId}-${userId}`;
+    // const userId = localStorage.getItem('userId') || 'unknownUser';
+    const peerId = `${meetingId}`;
 
     // PeerJS sunucusuna bağlan
     peer.current = new Peer(peerId, {

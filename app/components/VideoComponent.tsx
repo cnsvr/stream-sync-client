@@ -44,7 +44,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
     },
     
     {
-          "urls": "turn:europe.relay.metered.ca:443",
+          "url": "turn:europe.relay.metered.ca:443",
           "username": "1f56d8c725879fb3809563fa",
           "credential": "7QNpUd1kXOjtpK9/"
     }
@@ -60,8 +60,9 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       port: port,
       secure: true,
       path: '/myapp',
+      debug: 3,
       config: {
-        iceServers: iceServers
+        'iceServers': iceServers
       }
     });
 

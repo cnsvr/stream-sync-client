@@ -73,6 +73,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
+        userVideo.current.play();
       }
 
       if (!peer.current) {
@@ -92,6 +93,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
+            partnerVideo.current.play();
           } else {
             console.error('Partner video element is not available.');
           }
@@ -109,6 +111,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = remoteStream;
+            partnerVideo.current.play();
           } else {
             console.error('Partner video element is not available.');
           }

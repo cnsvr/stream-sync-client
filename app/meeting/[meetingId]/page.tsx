@@ -54,6 +54,16 @@ const MeetingPage = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!meeting) {
     return <div>Meeting not found</div>;
   }
@@ -61,8 +71,10 @@ const MeetingPage = () => {
   return (
     <main className="flex min-h-screen flex-col items-center p-12 bg-gray-900 dark:text-white">
       <h1 className="text-3xl font-bold mb-8">Meeting</h1>
-      <div className="w-full max-w-xl bg-gray-800">
-        <VideoComponent meetingId={meetingId as string} />
+      <div className="w-full flex justify-center">
+        <div className="max-w-5xl max-h-5xl w-full">
+          <VideoComponent meetingId={meetingId as string} />
+        </div>
       </div>
     </main>
   );

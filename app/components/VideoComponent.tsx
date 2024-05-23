@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import io from 'socket.io-client';
+import '../styles/video-component.css';
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
 
@@ -69,7 +70,7 @@ const VideoComponent = ({ meetingId } : VideoComponentProps ) => {
   }, [meetingId]);
 
   return (
-    <div>
+    <div className="video-container">
       <video ref={userVideo} autoPlay playsInline />
       <video ref={partnerVideo} autoPlay playsInline />
     </div>

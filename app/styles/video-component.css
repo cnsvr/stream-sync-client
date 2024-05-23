@@ -1,0 +1,17 @@
+.video-container {
+    display: flex;
+    justify-content: center; /* Videoları yatayda ortalar */
+    align-items: center; /* Videoları dikeyde ortalar */
+    gap: 20px; /* Videolar arasındaki boşluk */
+    max-width: 100%; /* Konteyner genişliği ekranı aşmasın */
+    padding: 20px;
+    box-sizing: border-box; /* Padding'in genişliğe dahil edilmesini sağlar */
+  }
+  
+  .video-container video {
+    width: 55%; /* Videoların genişliğini ayarlar */
+    height: 500px; /* Videoların yüksekliğini otomatik ayarlar */
+    aspect-ratio: 16/9; /* En-boy oranını sabitler */
+    object-fit: cover; /* Videoların arka planla tam eşleşmesini sağlar */
+    border: 2px solid #333; /* Videoların etrafına kenarlık ekler */
+  }

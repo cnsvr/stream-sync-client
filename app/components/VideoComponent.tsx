@@ -29,7 +29,7 @@ interface VideoComponentProps {
 const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
-  const [peer, setPeer] = useState<Peer | null>(null);
+  const [peerInstance, setPeerInstance] = useState<Peer | null>(null);
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
   const [partnerConnected, setPartnerConnected] = useState(false);
@@ -55,7 +55,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
             debug: 3,
           });
 
-          setPeer(peer);
+          setPeerInstance(peer);
 
           peer.on('open', id => {
             console.log('My peer ID is: ' + id);
@@ -105,8 +105,8 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       audio: true,
     }).then(stream => {
       console.log('Calling partner with id: ', peerId);
-      console.log('peer: ', peer)
-      const call = peer?.call(peerId, stream);
+      console.log('peer: ', peerInstance)
+      const call = peerInstance?.call(peerId, stream);
       console.log('call: ', call)
       if (call) {
         console.log('Call is not null');

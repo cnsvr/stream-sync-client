@@ -105,12 +105,18 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       audio: true,
     }).then(stream => {
       console.log('Calling partner with id: ', peerId);
+      console.log('peer: ', peer)
       const call = peer?.call(peerId, stream);
+      console.log('call: ', call)
       if (call) {
+        console.log('Call is not null');
         call.on('stream', userVideoStream => {
+          console.log('Stream received');
           if (partnerVideo.current) {
             setPartnerConnected(true);
             partnerVideo.current.srcObject = userVideoStream;
+          } else {
+            console.log('partnerVideo is null');
           }
         });
 

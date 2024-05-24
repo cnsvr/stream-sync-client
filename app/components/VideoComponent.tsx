@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import io from 'socket.io-client';
@@ -27,100 +29,95 @@ interface VideoComponentProps {
 const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
-  const peer = useRef<Peer | null>(null);
-  const [partnerConnected, setPartnerConnected] = useState<boolean>(false);
+  const [peer, setPeer] = useState<Peer | null>(null);
+  const [myUniqueId, setMyUniqueId] = useState<string>("");
+  const [idToCall, setIdToCall] = useState('');
+  const [partnerConnected, setPartnerConnected] = useState(false);
+
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
+  const generateRandomString = () => Math.random().toString(36).substring(2);
+
   useEffect(() => {
-    const userId = localStorage.getItem('userId') || 'unknownUser';
-    const peerId = `${meetingId}-${userId}${Math.floor(Math.random() * 1000)}`;
+    setMyUniqueId(generateRandomString());
+  }, []);
 
-    // Connect to PeerJS server
-    peer.current = new Peer(peerId, {
-      host: host,
-      port: port,
-      secure: true,
-      path: '/myapp',
-      debug: 1
-    });
+  useEffect(() => {
+    if(myUniqueId){
+        let peer: Peer;
+        if (typeof window !== 'undefined') {
+          peer = new Peer(myUniqueId, {
+            host: host,
+            port: port,
+            path: '/myapp',
+            secure: true,
+            debug: 3,
+          });
 
-    peer.current.on('open', id => {
-      console.log('My peer ID is: ' + id);
-      socket.emit('joinMeeting', { meetingId, peerId: id });
-    });
+          setPeer(peer);
 
-    // Get local video stream
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-      if (userVideo.current) {
-        userVideo.current.srcObject = stream;
-        userVideo.current.play();
-      }
+          peer.on('open', id => {
+            console.log('My peer ID is: ' + id);
+            socket.emit('joinMeeting', { meetingId, peerId: id });
+          });
+    
+          navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+          }).then(stream => {
+            if (userVideo.current) {
+              userVideo.current.srcObject = stream;
+            }
 
-      if (!peer.current) {
-        console.error('Unable to connect to PeerJS server.');
-        return;
-      }
+            peer.on('call', call => {
+              call.answer(stream);
+              call.on('stream', userVideoStream => {
+                if (partnerVideo.current) {
+                  setPartnerConnected(true);
+                  partnerVideo.current.srcObject = userVideoStream;
+                }
+              });
 
-      peer.current.on('error', error => {
-        console.error('PeerJS error:', error);
-      });
+              call.on('close', () => {
+                setPartnerConnected(false);
+              });
+            });
+          });
 
-      // Answer incoming calls
-      peer.current.on('call', call => {
-        call.answer(stream);
-        call.on('stream', remoteStream => {
-          console.log('Stream received on call:', remoteStream);
-          setPartnerConnected(true);
+          socket.on('userJoined', ({ peerId }) => {
+            setIdToCall(peerId);
+            callPartner();
+          });
+        }
+        return () => {
+            if (peer) {
+              peer.destroy();
+            }
+          };
+    }
+  }, [myUniqueId]);
+
+  const callPartner = () => {
+    navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    }).then(stream => {
+      const call = peer?.call(idToCall, stream);
+      if (call) {
+        call.on('stream', userVideoStream => {
           if (partnerVideo.current) {
-            partnerVideo.current.srcObject = remoteStream;
-            partnerVideo.current.play();
-          } else {
-            console.error('Partner video element is not available.');
+            setPartnerConnected(true);
+            partnerVideo.current.srcObject = userVideoStream;
           }
         });
 
         call.on('close', () => {
           setPartnerConnected(false);
         });
-      });
-
-      // Handle user joined event
-      socket.on('userJoined', ({ peerId }) => {
-        console.log('User joined:', peerId);
-        const call = peer.current?.call(peerId, stream);
-        call?.on('stream', remoteStream => {
-          console.log('Stream received on userJoined:', remoteStream);
-          setPartnerConnected(true);
-          if (partnerVideo.current) {
-            partnerVideo.current.srcObject = remoteStream;
-            partnerVideo.current.play();
-          } else {
-            console.error('Partner video element is not available.');
-          }
-        });
-
-        call?.on('close', () => {
-          console.log('User left:', peerId);
-          setPartnerConnected(false);
-        });
-      });
+      }
     });
-
-    return () => {
-      peer.current?.destroy();
-      socket.off('userJoined');
-    };
-  }, [meetingId]);
-
-  useEffect(() => {
-    if (partnerConnected && partnerVideo.current) {
-      // Try to play the video element if it is connected and available
-      partnerVideo.current.play().catch(error => {
-        console.error('Error playing partner video:', error);
-      });
-    }
-  }, [partnerConnected]);
+  };
 
   return (
     <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">

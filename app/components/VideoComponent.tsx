@@ -99,7 +99,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
     }
   }, [myUniqueId]);
 
-  const callPartner = (peerId) => {
+  const callPartner = (peerId: any) => {
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,

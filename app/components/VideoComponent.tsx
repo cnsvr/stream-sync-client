@@ -32,40 +32,17 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
-  
-  const iceServers = [
-
-    {
-          "urls": "stun:stun.relay.metered.ca:80"
-    },
-    {
-          "urls": "turn:europe.relay.metered.ca:80",
-          "username": "1f56d8c725879fb3809563fa",
-          "credential": "7QNpUd1kXOjtpK9/"
-    },
-    
-    {
-          "urls": "turn:europe.relay.metered.ca:443",
-          "username": "1f56d8c725879fb3809563fa",
-          "credential": "7QNpUd1kXOjtpK9/"
-    }
-];
-
-
   useEffect(() => {
     const userId = localStorage.getItem('userId') || 'unknownUser';
     const peerId = `${meetingId}-${userId}${Math.floor(Math.random() * 1000)}`;
 
-    // PeerJS sunucusuna bağlan
+    // Connect to PeerJS server
     peer.current = new Peer(peerId, {
       host: host,
       port: port,
       secure: true,
       path: '/myapp',
-      debug: 1,
-      config: {
-        iceServers: iceServers
-      }
+      debug: 1
     });
 
     peer.current.on('open', id => {
@@ -73,7 +50,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       socket.emit('joinMeeting', { meetingId, peerId: id });
     });
 
-    // Yerel video akışını al
+    // Get local video stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
@@ -81,7 +58,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       }
 
       if (!peer.current) {
-        console.error('PeerJS sunucusuna bağlanılamadı.');
+        console.error('Unable to connect to PeerJS server.');
         return;
       }
 
@@ -89,7 +66,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
         console.error('PeerJS error:', error);
       });
 
-      // Gelen aramaları cevapla
+      // Answer incoming calls
       peer.current.on('call', call => {
         call.answer(stream);
         call.on('stream', remoteStream => {
@@ -107,6 +84,8 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(false);
         });
       });
+
+      // Handle user joined event
       socket.on('userJoined', ({ peerId }) => {
         console.log('User joined:', peerId);
         const call = peer.current?.call(peerId, stream);
@@ -126,13 +105,22 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           setPartnerConnected(false);
         });
       });
-    });   
+    });
 
     return () => {
       peer.current?.destroy();
       socket.off('userJoined');
     };
   }, [meetingId]);
+
+  useEffect(() => {
+    if (partnerConnected && partnerVideo.current) {
+      // Try to play the video element if it is connected and available
+      partnerVideo.current.play().catch(error => {
+        console.error('Error playing partner video:', error);
+      });
+    }
+  }, [partnerConnected]);
 
   return (
     <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">

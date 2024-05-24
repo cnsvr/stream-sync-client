@@ -40,7 +40,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   socket.on('userJoined', ({ peerId }) => {
     console.log('User joined with id: ', peerId);
     setIdToCall(peerId);
-    callPartner();
+    callPartner(peerId);
   });
 
   const generateRandomString = () => Math.random().toString(36).substring(2);
@@ -105,12 +105,12 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     }
   }, [myUniqueId]);
 
-  const callPartner = () => {
+  const callPartner = (peerId: any) => {
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     }).then(stream => {
-      const call = peerInstance?.call(idToCall, stream);
+      const call = peerInstance?.call(peerId, stream);
       if (call) {
         call.on('stream', userVideoStream => {
           setPartnerConnected(true);

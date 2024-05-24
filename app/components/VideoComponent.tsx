@@ -122,6 +122,12 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
         call.on('close', () => {
           setPartnerConnected(false);
         });
+
+        call.peerConnection.oniceconnectionstatechange = () => {
+          if (call.peerConnection.iceConnectionState === 'disconnected') {
+            setPartnerConnected(false);
+          }
+        };
       }
     });
   };

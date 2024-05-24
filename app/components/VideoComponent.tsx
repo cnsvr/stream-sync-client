@@ -33,7 +33,6 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
   const [partnerConnected, setPartnerConnected] = useState(false);
-  const [guestReady, setGuestReady] = useState(false);
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -41,7 +40,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   socket.on('userJoined', ({ peerId }) => {
     console.log('User joined with id: ', peerId);
     setIdToCall(peerId);
-    callPartner(peerId);
+    callPartner();
   });
 
   const generateRandomString = () => Math.random().toString(36).substring(2);
@@ -64,7 +63,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
 
         peer.on('open', id => {
           console.log('My peer ID is: ' + id);
-          setPeerInstance(peer);  // Move setPeerInstance here after peer is open
+          setPeerInstance(peer);
           socket.emit('joinMeeting', { meetingId, peerId: id });
         });
 
@@ -85,14 +84,11 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
             call.on('stream', userVideoStream => {
               setPartnerConnected(true);
               if (partnerVideo.current) {
-                console.log('partner set as true');
-                // setPartnerConnected(true);
                 partnerVideo.current.srcObject = userVideoStream;
               }
             });
 
             call.on('close', () => {
-              console.log('partner set as false');
               setPartnerConnected(false);
             });
           });
@@ -109,25 +105,21 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     }
   }, [myUniqueId]);
 
-  const callPartner = (peerId: string) => {
+  const callPartner = () => {
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     }).then(stream => {
-      console.log('Calling partner with id: ', peerId);
-      const call = peerInstance?.call(peerId, stream);
+      const call = peerInstance?.call(idToCall, stream);
       if (call) {
         call.on('stream', userVideoStream => {
           setPartnerConnected(true);
           if (partnerVideo.current) {
-            console.log('partner set as true');
-            // setPartnerConnected(true);
             partnerVideo.current.srcObject = userVideoStream;
           }
         });
 
         call.on('close', () => {
-          console.log('partner set as false');
           setPartnerConnected(false);
         });
       }

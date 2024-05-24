@@ -55,13 +55,16 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
             debug: 3,
           });
 
-          setPeerInstance(peer);
-
           peer.on('open', id => {
             console.log('My peer ID is: ' + id);
+            setPeerInstance(peer);  // Move setPeerInstance here after peer is open
             socket.emit('joinMeeting', { meetingId, peerId: id });
           });
-    
+
+          peer.on('error', error => {
+            console.error('PeerJS error:', error);
+          });
+
           navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true,
@@ -83,23 +86,30 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
                 setPartnerConnected(false);
               });
             });
+          }).catch(error => {
+            console.error('Failed to get local stream:', error);
           });
 
           socket.on('userJoined', ({ peerId }) => {
             console.log('User joined with id: ', peerId);
             setIdToCall(peerId);
-            callPartner(peerId);
           });
         }
         return () => {
             if (peer) {
               peer.destroy();
             }
-          };
+        };
     }
   }, [myUniqueId]);
 
-  const callPartner = (peerId: any) => {
+  useEffect(() => {
+    if (peerInstance && idToCall) {
+      callPartner(idToCall);
+    }
+  }, [peerInstance, idToCall]);
+
+  const callPartner = (peerId: string) => {
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,

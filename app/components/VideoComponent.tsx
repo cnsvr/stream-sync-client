@@ -86,6 +86,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
           });
 
           socket.on('userJoined', ({ peerId }) => {
+            console.log('User joined with id: ', peerId);
             setIdToCall(peerId);
             callPartner();
           });
@@ -103,6 +104,7 @@ const VideoComponent = ({ meetingId, meeting } : VideoComponentProps ) => {
       video: true,
       audio: true,
     }).then(stream => {
+      console.log('Calling partner with id: ', idToCall);
       const call = peer?.call(idToCall, stream);
       if (call) {
         call.on('stream', userVideoStream => {

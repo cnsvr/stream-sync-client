@@ -8,6 +8,32 @@ import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
 
+const iceServers = [
+  {
+        "urls": "stun:stun.relay.metered.ca:80"
+  },
+  {
+        "urls": "turn:europe.relay.metered.ca:80",
+        "username": "1f56d8c725879fb3809563fa",
+        "credential": "7QNpUd1kXOjtpK9/"
+  },
+  {
+        "urls": "turn:europe.relay.metered.ca:80?transport=tcp",
+        "username": "1f56d8c725879fb3809563fa",
+        "credential": "7QNpUd1kXOjtpK9/"
+  },
+  {
+        "urls": "turn:europe.relay.metered.ca:443",
+        "username": "1f56d8c725879fb3809563fa",
+        "credential": "7QNpUd1kXOjtpK9/"
+  },
+  {
+        "urls": "turns:europe.relay.metered.ca:443?transport=tcp",
+        "username": "1f56d8c725879fb3809563fa",
+        "credential": "7QNpUd1kXOjtpK9/"
+  }
+];
+
 
 interface Meeting {
   _id: string;
@@ -62,6 +88,9 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           path: '/myapp',
           secure: true,
           debug: 3,
+          config: {
+            iceServers: iceServers
+          },
         });
 
         peer.on('open', id => {

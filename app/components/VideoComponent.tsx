@@ -4,8 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import io from 'socket.io-client';
 import '../styles/video-component.css';
+import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
+
 
 interface Meeting {
   _id: string;
@@ -33,6 +35,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
   const [partnerConnected, setPartnerConnected] = useState(false);
+  const router = useRouter(); // Initialize router for navigation
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -132,6 +135,15 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     });
   };
 
+  const leaveChat = () => {
+    if (peerInstance) {
+      peerInstance.destroy();
+      setPeerInstance(null);
+    }
+    // socket.disconnect();
+    router.push('/'); // Redirect to the main page
+  };
+
   return (
     <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
@@ -149,6 +161,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">{meeting.participant.fullName}</div>
         </div>
       )}
+      <button onClick={leaveChat} className="leave-button mt-4 px-4 py-2 bg-red-500 text-white rounded">Leave Chat</button>
     </div>
   );
 };

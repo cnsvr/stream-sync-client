@@ -11,6 +11,13 @@ const PeerPage = () => {
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
 
+  const iceServers = [
+    {
+      "urls": "stun:193.16.148.245:3478"
+    }
+  ];
+  
+
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
 
@@ -44,6 +51,9 @@ const PeerPage = () => {
             path: '/myapp',
             secure: true,
             debug: 3,
+            config: {
+              iceServers: iceServers
+            },
           });
 
           setPeerInstance(peer);

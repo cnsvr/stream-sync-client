@@ -48,23 +48,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   const userId = localStorage.getItem('userId');
 
   const generateRandomString = () => Math.random().toString(36).substring(2);
-
-  
-  socket.on('userJoined', ({ peerId }) => {
-    console.log('User joined with id: ', peerId);
-    setIdToCall(peerId);
-    callPartner(peerId);
-  });
-  
-  socket?.on('userLeft', ({ peerId }) => {
-    console.log('User left with id: ', peerId);
-    setPartnerConnected(false);
-    if (partnerVideo.current) {
-      partnerVideo.current.srcObject = null;
-    }
-  
-  });
- 
+   
   useEffect(() => {
     setMyUniqueId(generateRandomString());
   }, []);
@@ -85,7 +69,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
         });
 
         peer.on('open', id => {
-          console.log('My peer ID is: ' + id);
+          console.log('My peer ID is: %s at %s', id, new Date().toISOString());
           setPeerInstance(peer);
           socket.emit('joinMeeting', { meetingId, peerId: id });
         });
@@ -99,6 +83,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           audio: true,
         }).then(stream => {
           if (userVideo.current) {
+            console.log('Setting user video stream at %s', new Date().toISOString());
             userVideo.current.srcObject = stream;
           }
 
@@ -128,11 +113,37 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     }
   }, [myUniqueId, socket]);
 
+  useEffect(() => {
+    if (peerInstance) {
+      socket.on('userJoined', ({ peerId }) => {
+        console.log('User joined with id: ', peerId);
+        setIdToCall(peerId);
+        callPartner(peerId);
+      });
+
+      socket.on('userLeft', ({ peerId }) => {
+        console.log('User left with id: ', peerId);
+        if (peerId === idToCall) {
+          setPartnerConnected(false);
+          if (partnerVideo.current) {
+            partnerVideo.current.srcObject = null;
+          }
+        }
+      });
+
+      return () => {
+        socket.off('userJoined');
+        socket.off('userLeft');
+      };
+    }
+  }, [peerInstance, socket, idToCall]);
+
   const callPartner = (peerId: any) => {
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     }).then(stream => {
+      console.log('Calling partner with id: %s at %s', peerId, new Date().toISOString());
       const call = peerInstance?.call(peerId, stream);
       if (call) {
         call.on('stream', userVideoStream => {
@@ -159,7 +170,6 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
       }
     });
   };
-  
 
   const leaveChat = () => {
     if (peerInstance) {

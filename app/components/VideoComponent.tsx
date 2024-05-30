@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
-import io from 'socket.io-client';
 import '../styles/video-component.css';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 import { useSocket } from '../components/SocketContext'; // Socket Context'ten useSocket hook'unu içe aktarın
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
 
 const iceServers = [
   {
@@ -39,9 +40,11 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   const [peerInstance, setPeerInstance] = useState<Peer | null>(null);
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
-  const [partnerConnected, setPartnerConnected] = useState(false);
   const router = useRouter(); // Initialize router for navigation
   const { socket } = useSocket(); // Socket instance'ını context'ten alın
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [partnerVideoOff, setPartnerVideoOff] = useState(false);
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -90,14 +93,14 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           peer.on('call', call => {
             call.answer(stream);
             call.on('stream', userVideoStream => {
-              setPartnerConnected(true);
+              // setPartnerConnected(true);
               if (partnerVideo.current) {
                 partnerVideo.current.srcObject = userVideoStream;
               }
             });
 
             call.on('close', () => {
-              setPartnerConnected(false);
+              // setPartnerConnected(false);
             });
           });
         }).catch(error => {
@@ -124,7 +127,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
       socket.on('userLeft', ({ peerId }) => {
         console.log('User left with id: ', peerId);
         if (peerId === idToCall) {
-          setPartnerConnected(false);
+          // setPartnerConnected(false);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = null;
           }
@@ -147,14 +150,14 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
       const call = peerInstance?.call(peerId, stream);
       if (call) {
         call.on('stream', userVideoStream => {
-          setPartnerConnected(true);
+          // setPartnerConnected(true);
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = userVideoStream;
           }
         });
 
         call.on('close', () => {
-          setPartnerConnected(false);
+          // setPartnerConnected(false);
         });
 
         console.log('peer connection: ', call.peerConnection);
@@ -164,7 +167,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           console.log('ICE connection state: %s at %s', call.peerConnection.iceConnectionState, new Date().toISOString());
           if (call.peerConnection.iceConnectionState === 'disconnected') {
             console.log('Disconnected and setting partner connected to false');
-            setPartnerConnected(false);
+            // setPartnerConnected(false);
           }
         };
       }
@@ -180,18 +183,46 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     router.push('/'); // Redirect to the main page
   };
 
+  const toggleMute = () => {
+    if (userVideo.current && userVideo.current.srcObject) {
+      const stream = userVideo.current.srcObject as MediaStream;
+      stream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (userVideo.current && userVideo.current.srcObject) {
+      const stream = userVideo.current.srcObject as MediaStream;
+      stream.getVideoTracks().forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setIsVideoOff(!isVideoOff);
+    }
+  };
+  
   return (
     <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
         <video ref={userVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
-        <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">{meeting.creator._id === userId ? meeting.creator.fullName : meeting.participant.fullName}</div>
+        <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">
+          {meeting.creator._id === userId ? meeting.creator.fullName : meeting.participant.fullName}
+        </div>
+        <div className="video-control absolute top-0 right-0 m-2 flex flex-col gap-2">
+          <button onClick={toggleMute} className="video-mute-button px-2 py-1 bg-white text-black rounded flex items-center">
+            <FontAwesomeIcon icon={isMuted ? faMicrophone : faMicrophoneSlash} />
+          </button>
+          <button onClick={toggleVideo} className="video-camera-button px-2 py-1 bg-white text-black rounded flex items-center">
+            <FontAwesomeIcon icon={isVideoOff ? faVideo : faVideoSlash} />
+          </button>
+        </div>
       </div>
-      
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
         <video ref={partnerVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
-        <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">{meeting.participant._id === userId ? meeting.creator.fullName : meeting.participant.fullName}</div>
+        <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">
+          {meeting.participant._id === userId ? meeting.creator.fullName : meeting.participant.fullName}
+        </div>
       </div>
-     
       <button onClick={leaveChat} className="leave-button mt-4 px-4 py-2 bg-red-500 text-white rounded">Leave Chat</button>
     </div>
   );

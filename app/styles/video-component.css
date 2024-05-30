@@ -49,3 +49,40 @@
     left: 0; /* Ekle */
   }
   
+
+  .video-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .video-mute-button, .video-camera-button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .video-mute-button:hover, .video-camera-button:hover {
+    background: #f0f0f0;
+  }
+  
+  .leave-button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #ff0000;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .leave-button:hover {
+    background: #cc0000;
+  }

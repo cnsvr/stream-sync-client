@@ -65,7 +65,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           port: port,
           path: '/myapp',
           secure: true,
-          debug: 3,
+          debug: 0,
           config: {
             iceServers: iceServers
           },
@@ -160,11 +160,8 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           // setPartnerConnected(false);
         });
 
-        console.log('peer connection: ', call.peerConnection);
-
         call.peerConnection.oniceconnectionstatechange = () => {
           // date with milliseconds
-          console.log('ICE connection state: %s at %s', call.peerConnection.iceConnectionState, new Date().toISOString());
           if (call.peerConnection.iceConnectionState === 'disconnected') {
             console.log('Disconnected and setting partner connected to false');
             // setPartnerConnected(false);
@@ -206,7 +203,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
         <video ref={userVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
         <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">
-          {meeting.creator._id === userId ? meeting.creator.fullName : meeting.participant.fullName}
+          Me
         </div>
         <div className="video-control absolute top-0 right-0 m-2 flex flex-col gap-2">
           <button onClick={toggleMute} className="video-mute-button px-2 py-1 bg-white text-black rounded flex items-center">

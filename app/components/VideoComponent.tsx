@@ -38,13 +38,13 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
   const [peerInstance, setPeerInstance] = useState<Peer | null>(null);
+  const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
   const router = useRouter(); // Initialize router for navigation
   const { socket } = useSocket(); // Socket instance'ını context'ten alın
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [partnerVideoOff, setPartnerVideoOff] = useState(false);
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -86,7 +86,6 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           audio: true,
         }).then(stream => {
           if (userVideo.current) {
-            console.log('Setting user video stream at %s', new Date().toISOString());
             userVideo.current.srcObject = stream;
           }
 
@@ -97,7 +96,10 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
               if (partnerVideo.current) {
                 partnerVideo.current.srcObject = userVideoStream;
               }
+
             });
+
+            setPeerConnection(call.peerConnection);
 
             call.on('close', () => {
               // setPartnerConnected(false);
@@ -146,7 +148,6 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
       video: true,
       audio: true,
     }).then(stream => {
-      console.log('Calling partner with id: %s at %s', peerId, new Date().toISOString());
       const call = peerInstance?.call(peerId, stream);
       if (call) {
         call.on('stream', userVideoStream => {
@@ -154,11 +155,14 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = userVideoStream;
           }
+          
         });
 
         call.on('close', () => {
           // setPartnerConnected(false);
         });
+        
+        setPeerConnection(call.peerConnection);
 
         call.peerConnection.oniceconnectionstatechange = () => {
           // date with milliseconds
@@ -181,23 +185,24 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   };
 
   const toggleMute = () => {
-    if (userVideo.current && userVideo.current.srcObject) {
-      const stream = userVideo.current.srcObject as MediaStream;
-      stream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
-      setIsMuted(!isMuted);
-    }
+    toggleMediaStream('audio', isMuted);
+    setIsMuted(!isMuted);
   };
 
   const toggleVideo = () => {
-    if (userVideo.current && userVideo.current.srcObject) {
-      const stream = userVideo.current.srcObject as MediaStream;
-      stream.getVideoTracks().forEach(track => {
-        track.enabled = !track.enabled;
-      });
-      setIsVideoOff(!isVideoOff);
-    }
+    toggleMediaStream('video', isVideoOff);
+    setIsVideoOff(!isVideoOff);
   };
-  
+
+  const toggleMediaStream = (type: 'audio' | 'video', state: boolean) => {
+    const stream = userVideo.current?.srcObject as MediaStream;
+    stream.getTracks().filter(track => track.kind === type).forEach(track => track.enabled = state);
+    const videoSender = peerConnection?.getSenders().find(sender => sender.track?.kind === type);
+    if (videoSender) {
+      videoSender.track!.enabled = state;
+    }
+  }
+
   return (
     <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">

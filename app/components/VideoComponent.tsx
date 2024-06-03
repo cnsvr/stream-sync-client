@@ -6,7 +6,8 @@ import '../styles/video-component.css';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 import { useSocket } from '../components/SocketContext'; // Socket Context'ten useSocket hook'unu içe aktarın
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash, faComments } from '@fortawesome/free-solid-svg-icons';
+import ChatComponent from '../components/ChatComponent';
 
 const iceServers = [
   {
@@ -35,16 +36,18 @@ interface VideoComponentProps {
 }
 
 const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
+  const router = useRouter();
+  const { socket } = useSocket();
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
   const [peerInstance, setPeerInstance] = useState<Peer | null>(null);
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
-  const router = useRouter(); // Initialize router for navigation
-  const { socket } = useSocket(); // Socket instance'ını context'ten alın
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [stats, setStats] = useState<any>({});
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -143,6 +146,28 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     }
   }, [peerInstance, socket, idToCall]);
 
+  useEffect(() => {
+    if (peerConnection) {
+      const interval = setInterval(() => {
+        peerConnection.getStats(null).then(stats => {
+          const statsOutput: any = {};
+          stats.forEach(report => {
+            if (report.type === 'inbound-rtp' && report.kind === 'video') {
+              statsOutput.frameRate = report.framesPerSecond;
+            }
+            // console.log(report);
+            if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+              statsOutput.currentRoundTripTime = report.currentRoundTripTime;
+            }
+          });
+          setStats(statsOutput);
+        });
+      }, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [peerConnection]);
+
   const callPartner = (peerId: any) => {
     navigator.mediaDevices.getUserMedia({
       video: true,
@@ -203,6 +228,10 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     }
   }
 
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
   return (
     <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
@@ -217,6 +246,9 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
           <button onClick={toggleVideo} className="video-camera-button px-2 py-1 bg-white text-black rounded flex items-center">
             <FontAwesomeIcon icon={isVideoOff ? faVideo : faVideoSlash} />
           </button>
+          <button onClick={toggleChat} className="bg-gray-800 text-white p-2 rounded">
+              <FontAwesomeIcon icon={faComments} />
+          </button>
         </div>
       </div>
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
@@ -226,6 +258,7 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
         </div>
       </div>
       <button onClick={leaveChat} className="leave-button mt-4 px-4 py-2 bg-red-500 text-white rounded">Leave Chat</button>
+      <ChatComponent isChatOpen={isChatOpen} toggleChat={toggleChat} />
     </div>
   );
 };

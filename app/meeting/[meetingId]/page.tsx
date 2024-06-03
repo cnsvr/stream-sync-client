@@ -22,6 +22,7 @@ const MeetingPage = () => {
   const { meetingId } = useParams<any>();
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!meetingId) return;
@@ -68,6 +69,10 @@ const MeetingPage = () => {
   if (!meeting) {
     return <div>Meeting not found</div>;
   }
+
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center p-12 bg-gray-900 dark:text-white">

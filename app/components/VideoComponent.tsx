@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import '../styles/video-component.css';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
-import { useSocket } from '../components/SocketContext'; // Socket Context'ten useSocket hook'unu içe aktarın
+import { useSocket } from '../components/SocketContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash, faComments } from '@fortawesome/free-solid-svg-icons';
 
@@ -31,11 +31,10 @@ interface Participant {
 interface VideoComponentProps {
   meetingId: string;
   meeting: Meeting;
-  isChatOpen: boolean;
   toggleChat: () => void;
 }
 
-const VideoComponent = ({ meetingId, meeting, isChatOpen, toggleChat }: VideoComponentProps) => {
+const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps) => {
   const router = useRouter();
   const { socket } = useSocket();
   const userVideo = useRef<HTMLVideoElement | null>(null);

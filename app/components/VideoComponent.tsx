@@ -7,14 +7,12 @@ import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 import { useSocket } from '../components/SocketContext'; // Socket Context'ten useSocket hook'unu içe aktarın
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash, faComments } from '@fortawesome/free-solid-svg-icons';
-import ChatComponent from '../components/ChatComponent';
 
 const iceServers = [
   {
     "urls": "stun:193.16.148.245:3478"
   }
 ];
-
 
 interface Meeting {
   _id: string;
@@ -33,9 +31,11 @@ interface Participant {
 interface VideoComponentProps {
   meetingId: string;
   meeting: Meeting;
+  isChatOpen: boolean;
+  toggleChat: () => void;
 }
 
-const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
+const VideoComponent = ({ meetingId, meeting, isChatOpen, toggleChat }: VideoComponentProps) => {
   const router = useRouter();
   const { socket } = useSocket();
   const userVideo = useRef<HTMLVideoElement | null>(null);
@@ -47,7 +47,6 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [stats, setStats] = useState<any>({});
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -228,12 +227,8 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
     }
   }
 
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
-  };
-
   return (
-    <div className="video-container flex justify-center items-center gap-4 flex-wrap max-h-screen overflow-hidden">
+    <div className="video-container">
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
         <video ref={userVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
         <div className="video-label absolute bottom-0 left-0 w-full text-center bg-black bg-opacity-60 text-white py-2">
@@ -258,7 +253,6 @@ const VideoComponent = ({ meetingId, meeting }: VideoComponentProps) => {
         </div>
       </div>
       <button onClick={leaveChat} className="leave-button mt-4 px-4 py-2 bg-red-500 text-white rounded">Leave Chat</button>
-      <ChatComponent isChatOpen={isChatOpen} toggleChat={toggleChat} />
     </div>
   );
 };

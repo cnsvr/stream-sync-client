@@ -3,6 +3,8 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import VideoComponent from '../../components/VideoComponent';
+import ChatComponent from '../../components/ChatComponent';
+import '../../styles/meeting.css';
 
 interface Meeting {
   _id: string;
@@ -77,10 +79,11 @@ const MeetingPage = () => {
   return (
     <main className="flex min-h-screen flex-col items-center p-12 bg-gray-900 dark:text-white">
       <h1 className="text-3xl font-bold mb-8">Meeting</h1>
-      <div className="w-full flex justify-center">
+      <div className={`${isChatOpen ? 'chat-open' : ''} w-full flex justify-center`}>
         <div className="max-w-5xl max-h-5xl w-full">
-          <VideoComponent meetingId={meetingId as string} meeting={meeting} />
+          <VideoComponent meetingId={meetingId as string} meeting={meeting} toggleChat={toggleChat} isChatOpen={isChatOpen} />
         </div>
+        <ChatComponent isChatOpen={isChatOpen} toggleChat={toggleChat} />
       </div>
     </main>
   );

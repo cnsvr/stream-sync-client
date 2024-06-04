@@ -70,7 +70,7 @@ const ChatComponent = ({ isChatOpen, toggleChat, meetingId }: ChatComponentProps
         {messages.map((message, index) => (
           <div key={index} className={`chat-message mb-2 p-2 rounded ${message.sender === senderId ? 'bg-indigo-600 text-white self-end' : 'bg-gray-100 text-gray-900 self-start'}`}>
             <div className="text-sm font-normal leading-snug">{message.text}</div>
-            <div className="text-xs text-gray-500 text-right">{message.time}</div>
+            <div className="text-xs text-gray-500 text-right">{message.time.split(":").slice(0, 2).join(":")}</div>
           </div>
         ))}
       </div>

@@ -6,7 +6,8 @@ import '../styles/video-component.css';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 import { useSocket } from '../components/SocketContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash, faComments } from '@fortawesome/free-solid-svg-icons';
+import NewWindow from 'react-new-window'
+import { faMicrophoneSlash, faMicrophone, faVideo, faVideoSlash, faComments, faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
 const iceServers = [
   {
@@ -39,13 +40,14 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
   const { socket } = useSocket();
   const userVideo = useRef<HTMLVideoElement | null>(null);
   const partnerVideo = useRef<HTMLVideoElement | null>(null);
+  const partnerScreenShareVideo = useRef<HTMLVideoElement | null>(null);
   const [peerInstance, setPeerInstance] = useState<Peer | null>(null);
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const [myUniqueId, setMyUniqueId] = useState<string>("");
   const [idToCall, setIdToCall] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [stats, setStats] = useState<any>({});
+  const [isPartnerScreenSharing, setIsPartnerScreenSharing] = useState(false);
 
   const host = process.env.NEXT_PUBLIC_PEER_SERVER || 'localhost';
   const port = Number(process.env.NEXT_PUBLIC_PEER_PORT) || 9000;
@@ -144,28 +146,6 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
     }
   }, [peerInstance, socket, idToCall]);
 
-  useEffect(() => {
-    if (peerConnection) {
-      const interval = setInterval(() => {
-        peerConnection.getStats(null).then(stats => {
-          const statsOutput: any = {};
-          stats.forEach(report => {
-            if (report.type === 'inbound-rtp' && report.kind === 'video') {
-              statsOutput.frameRate = report.framesPerSecond;
-            }
-            // console.log(report);
-            if (report.type === 'candidate-pair' && report.state === 'succeeded') {
-              statsOutput.currentRoundTripTime = report.currentRoundTripTime;
-            }
-          });
-          setStats(statsOutput);
-        });
-      }, 100);
-
-      return () => clearInterval(interval);
-    }
-  }, [peerConnection]);
-
   const callPartner = (peerId: any) => {
     navigator.mediaDevices.getUserMedia({
       video: true,
@@ -178,7 +158,6 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
           if (partnerVideo.current) {
             partnerVideo.current.srcObject = userVideoStream;
           }
-          
         });
 
         call.on('close', () => {
@@ -186,14 +165,6 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
         });
         
         setPeerConnection(call.peerConnection);
-
-        call.peerConnection.oniceconnectionstatechange = () => {
-          // date with milliseconds
-          if (call.peerConnection.iceConnectionState === 'disconnected') {
-            console.log('Disconnected and setting partner connected to false');
-            // setPartnerConnected(false);
-          }
-        };
       }
     });
   };
@@ -226,6 +197,15 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
     }
   }
 
+  const shareScreen = async () => {
+    // @ts-ignore
+  };
+  
+  const stopScreenShare = () => {
+    // @ts-ignore
+  };
+
+
   return (
     <div className="video-container">
       <div className="video-wrapper relative w-[calc(50%-1rem)] pt-[50%] bg-black overflow-hidden">
@@ -240,8 +220,11 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
           <button onClick={toggleVideo} className="video-camera-button px-2 py-1 bg-white text-black rounded flex items-center">
             <FontAwesomeIcon icon={isVideoOff ? faVideo : faVideoSlash} />
           </button>
-          <button onClick={toggleChat} className="bg-gray-800 text-white p-2 rounded">
+          <button onClick={toggleChat} className="bg-white text-black p-2 rounded">
               <FontAwesomeIcon icon={faComments} />
+          </button>
+          <button onClick={shareScreen} className="bg-gray-800 text-white p-2 rounded">
+            <FontAwesomeIcon icon={faArrowUpRightFromSquare} /> 
           </button>
         </div>
       </div>
@@ -252,7 +235,12 @@ const VideoComponent = ({ meetingId, meeting, toggleChat }: VideoComponentProps)
         </div>
       </div>
       <button onClick={leaveChat} className="leave-button mt-4 px-4 py-2 bg-red-500 text-white rounded">Leave Chat</button>
+      {isPartnerScreenSharing &&
+        <NewWindow features={{ width: 500, height: 500 }} title="Partner Screen Share">
+          <video ref={partnerScreenShareVideo} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
+        </NewWindow>}
     </div>
+    
   );
 };
 
